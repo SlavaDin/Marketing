@@ -1,11 +1,167 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <title>Калькулятор стоимости металла</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    label { display: block; margin-top: 10px; }
+    input, select { margin-top: 5px; }
+    .result { margin-top: 20px; font-weight: bold; }
+  </style>
 </head>
 <body>
-    
+  <h1>Калькулятор стоимости металла</h1>
+
+  <label>Рулон (базовая цена, ₽): 
+    <input type="number" id="basePrice" value="80800">
+    <select onchange="document.getElementById('basePrice').value=this.value">
+      <option value="">Выберите цену</option>
+      <optgroup label="Москва / Санкт-Петербург">
+        <option value="41367">ГК лист 41367</option>
+        <option value="38033">ГК рулон 38033</option>
+        <option value="44283">ХК лист 44283</option>
+        <option value="43450">ХК рулон 43450</option>
+        <option value="59167">Оцинк 59167</option>
+        <option value="72167">Полимер 72167</option>
+        <option value="80800">Жесть 80800</option>
+      </optgroup>
+      <optgroup label="Ростов">
+        <option value="42167">ГК лист 42167</option>
+        <option value="38833">ГК рулон 38833</option>
+        <option value="45083">ХК лист 45083</option>
+        <option value="44250">ХК рулон 44250</option>
+      </optgroup>
+      <optgroup label="Центр Волгоград">
+        <option value="43267">ГК лист 43267</option>
+        <option value="39933">ГК рулон 39933</option>
+        <option value="46183">ХК лист 46183</option>
+        <option value="45350">ХК рулон 45350</option>
+      </optgroup>
+      <optgroup label="Сибирь">
+        <option value="44667">ГК лист 44667</option>
+        <option value="41333">ГК рулон 41333</option>
+        <option value="47583">ХК лист 47583</option>
+        <option value="46750">ХК рулон 46750</option>
+      </optgroup>
+      <optgroup label="Урал">
+        <option value="44167">ГК лист 44167</option>
+        <option value="40833">ГК рулон 40833</option>
+        <option value="47083">ХК лист 47083</option>
+        <option value="46250">ХК рулон 46250</option>
+      </optgroup>
+    </select>
+  </label>
+  <label>Толщина (мм): <input type="number" step="0.01" id="thickness" value="0.25"></label>
+  <label>Нестандартный допуск (усл. ед.): <input type="number" id="toleranceAdd" value="10"></label>
+  <label>Сталь (вид стали / класс): 
+    <select id="steelGrade">
+      <option value="I">I</option>
+      <option value="II">II</option>
+      <option value="III">III</option>
+      <option value="D1">D1</option>
+      <option value="D2">D2</option>
+      <option value="D3">D3</option>
+    </select>
+  </label>
+  <label>Вес рулона (тн): <input type="number" step="0.1" id="rollWeight" value="6"></label>
+  <label>Объём (скидка/надбавка, %): <input type="number" id="volumePercent" value="0"></label>
+  <label>Кредит:
+    <select id="creditBonus">
+      <option value="1.01">30 дней (1%)</option>
+      <option value="1.005">15 дней (0.5%)</option>
+      <option value="1">Без кредита</option>
+    </select>
+  </label>
+  <label>Станция (тариф, ₽):
+    <select id="stationPrice">
+      <option value="0">Выберите станцию</option>
+      <option value="4273">АБАКАН</option>
+      <option value="6929">АВТОВО</option>
+      <option value="3127">АЛТАЙСКАЯ</option>
+      <option value="5572">АНЗЕБИ</option>
+      <option value="6929">АНТРОПШИНО</option>
+      <option value="3861">АППАРАТНАЯ</option>
+      <option value="4855">АСТРАХАНЬ-1</option>
+      <option value="4375">АЧИНСК-1</option>
+      <option value="4375">АЧИНСК-2</option>
+      <option value="5572">БАГУЛЬНАЯ</option>
+      <option value="4571">БАЗАИХА</option>
+      <option value="5161">БАЛАКОВО</option>
+      <option value="6028">БАЛАШИХА</option>
+      <option value="3127">БАРНАУЛ</option>
+      <option value="6109">БАТАЙСК</option>
+      <option value="5919">БАТАРЕЙНАЯ</option>
+      <option value="4246">БАХАРЕВКА</option>
+      <option value="4637">БЕЗЫМЯНКА</option>
+      <option value="3831">БЕЛОРЕЦК</option>
+      <option value="6214">БЕЛЫЙ РАСТ</option>
+      <option value="3337">БЕРДСК</option>
+      <option value="5308">БЕТОННАЯ ТОВАРНАЯ</option>
+      <option value="3307">БИЙСК</option>
+      <option value="6028">БИРЮЛЕВО ТОВАРНАЯ</option>
+      <option value="4976">БИРЮЛИ</option>
+    </select>
+  </label>
+  <label>Сорт:
+    <select id="sortDiscount">
+      <option value="0.94">Беззаказная (6%)</option>
+      <option value="0.90">2 сорт (10%)</option>
+      <option value="0.80">3 сорт (20%)</option>
+      <option value="1.00" selected>Первый сорт (без скидки)</option>
+    </select>
+  </label>
+  <label>Курс усл. ед. (₽): <input type="number" id="unitRate" value="100"></label>
+
+  <button onclick="calculate()">Рассчитать</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    function getThicknessSurcharge(thickness, grade) {
+      const table = {
+        'I': {
+          0.17: 55, 0.18: 46, 0.19: 37, 0.2: 29, 0.21: 22, 0.22: 16, 0.23: 10, 0.24: 5, 0.25: 0,
+          0.26: -5, 0.27: -9, 0.28: -13, 0.29: -16, 0.3: -20, 0.31: -20, 0.32: -20, 0.33: -20,
+          0.34: -20, 0.35: -20, 0.36: -20
+        }
+      };
+      const val = table[grade] && table[grade][parseFloat(thickness).toFixed(2)];
+      return val !== undefined ? val : 0;
+    }
+
+    function getRollWeightSurcharge(weight) {
+      if (weight < 6) return 15;
+      return 0;
+    }
+
+    function calculate() {
+      const basePrice = parseFloat(document.getElementById("basePrice").value);
+      const thickness = parseFloat(document.getElementById("thickness").value);
+      const toleranceAdd = parseFloat(document.getElementById("toleranceAdd").value);
+      const steelGrade = document.getElementById("steelGrade").value;
+      const rollWeight = parseFloat(document.getElementById("rollWeight").value);
+      const volumePercent = parseFloat(document.getElementById("volumePercent").value);
+      const creditBonus = parseFloat(document.getElementById("creditBonus").value);
+      const stationPrice = parseFloat(document.getElementById("stationPrice").value);
+      const sortDiscount = parseFloat(document.getElementById("sortDiscount").value);
+      const unitRate = parseFloat(document.getElementById("unitRate").value);
+
+      let thicknessAdd = getThicknessSurcharge(thickness, steelGrade) * unitRate / 100;
+      let rollWeightAdd = getRollWeightSurcharge(rollWeight) * unitRate / 100;
+      let tolerance = toleranceAdd * unitRate / 100;
+
+      let total = basePrice;
+      total += thicknessAdd;
+      total += tolerance;
+      total += rollWeightAdd;
+      total += stationPrice;
+      total *= sortDiscount;
+      total *= creditBonus;
+      total *= (1 + volumePercent / 100);
+
+      document.getElementById("result").innerText = `Цена за тонну: ${Math.round(total)} руб.`;
+    }
+  </script>
 </body>
 </html>
